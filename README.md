@@ -1,250 +1,143 @@
-# authentication OpenAPI Definition
+# create-openapi-repo
 
-## Working on your OpenAPI Definition
+[![NPM version][npm-image]][npm-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
-### Install
+> Generate an organized multi-file OpenAPI repository.
 
-1. Install [Node JS](https://nodejs.org/).
-2. Clone this repo and run `npm install` in the repo root.
+<center>
 
-### Usage
+<img src="./logo.png" width="500px"/>
 
-#### `npm start`
-Starts the reference docs preview server.
+</center>
 
-#### `npm run build`
-Bundles the definition to the dist folder.
+## Who?
+You! Hello.  Do you need to write or contribute to an OpenAPI definition?  If so, read on...
 
-#### `npm test`
-Validates the definition.
+## What?
+We recommend a docs-like-code approach to OpenAPI definitions:
+- Write it using your favorite text-editor or IDE (we love VSCode).
+- Organize it into multiple files and folders to make it easy to navigate.
+- Store it using source control (such as GitHub).
+- Continuously validate it using our free [openapi-cli tool](https://github.com/redocly/openapi-cli) or our free continuous validation service (coming soon).
+- Bundle it (for a smaller footprint to use in other tools or for tools that do not support a multi-file format).
 
-## Contribution Guide
+## Why?
+There are a few advantages in hosting your API definition on GitHub:
+ - Community engagement (PR's and issues -- if you have a public repo)
+ - Advertisment in the GitHub community
+ - Hosting on GitHub pages (perfect uptime, CDN, Jekyll, custom domains with CNAME)
+ - Revision history, branching, CI
+ - Review and approval workflows using Pull Requests
+ - Fast on-boarding time (developers and tech writers know how to use GitHub :smile:)
+ - Fully compatible with Redocly API Reference too
 
-Below is a sample contribution guide. The tools
-in the repository don't restrict you to any
-specific structure. Adjust the contribution guide
-to match your own structure. However, if you
-don't have a structure in mind, this is a
-good place to start.
+ There are also some advantages to a multi-file YAML format OpenAPI definition:
+ - Reuse schema objects to keep things DRY (don't repeat yourself) 
+ - Smaller diffs compared to JSON (especially for markdown descriptions)
+ - Easier to navigate
+ - Easier to edit with confidence
 
-Update this contribution guide if you
-adjust the file/folder organization.
+## Features
+This generator helps to create a GitHub repo with the following features:
+ - Split a big (or small) OpenAPI definition into smaller files organized into folders
+ - Bundle it into a single file for deployment
+ - Continuous integration/deployment on Travis or Redocly Workflows
+ - Code samples as separate files
+ - Automate deployment of your OpenAPI definition and docs
+ - OpenAPI definition is validated after each commit
+ - Live editing in your editor of choice :heart_eyes:
 
-The `.redocly.yaml` controls settings for various
-tools including the lint tool and the reference
-docs engine.  Open it to find examples and
-[read the docs](https://redoc.ly/docs/cli/configuration/)
-for more information.
+## Structure
 
-
-### Schemas
-
-#### Adding Schemas
-
-1. Navigate to the `openapi/components/schemas` folder.
-2. Add a file named as you wish to name the schema.
-3. Define the schema.
-4. Refer to the schema using the `$ref` (see example below).
-
-##### Example Schema
-This is a very simple schema example:
-```yaml
-type: string
-description: The resource ID. Defaults to UUID v4
-maxLength: 50
-example: 4f6cf35x-2c4y-483z-a0a9-158621f77a21
+You will have a structure similar to this:
 ```
-This is a more complex schema example:
-```yaml
-type: object
-properties:
-  id:
-    description: The customer identifier string
-    readOnly: true
-    allOf:
-      - $ref: ./ResourceId.yaml
-  websiteId:
-    description: The website's ID
-    allOf:
-      - $ref: ./ResourceId.yaml
-  paymentToken:
-    type: string
-    writeOnly: true
-    description: |
-      A write-only payment token; if supplied, it will be converted into a
-      payment instrument and be set as the `defaultPaymentInstrument`. The
-      value of this property will override the `defaultPaymentInstrument`
-      in the case that both are supplied. The token may only be used once
-      before it is expired.
-  defaultPaymentInstrument:
-    $ref: ./PaymentInstrument.yaml
-  createdTime:
-    description: The customer created time
-    allOf:
-      - $ref: ./ServerTimestamp.yaml
-  updatedTime:
-    description: The customer updated time
-    allOf:
-      - $ref: ./ServerTimestamp.yaml
-  tags:
-    description: A list of customer's tags
-    readOnly: true
-    type: array
-    items:
-      $ref: ./Tags/Tag.yaml
-  revision:
-    description: >
-      The number of times the customer data has been modified.
-
-      The revision is useful when analyzing webhook data to determine if the
-      change takes precedence over the current representation.
-    type: integer
-    readOnly: true
-  _links:
-    type: array
-    description: The links related to resource
-    readOnly: true
-    minItems: 3
-    items:
-      anyOf:
-        - $ref: ./Links/SelfLink.yaml
-        - $ref: ./Links/NotesLink.yaml
-        - $ref: ./Links/DefaultPaymentInstrumentLink.yaml
-        - $ref: ./Links/LeadSourceLink.yaml
-        - $ref: ./Links/WebsiteLink.yaml
-  _embedded:
-    type: array
-    description: >-
-      Any embedded objects available that are requested by the `expand`
-      querystring parameter.
-    readOnly: true
-    minItems: 1
-    items:
-      anyOf:
-        - $ref: ./Embeds/LeadSourceEmbed.yaml
-
+    ├── .redocly.yaml
+    ├── LICENSE
+    ├── README.md
+    ├── docs
+    │   ├── favicon.png
+    │   └── index.html
+    ├── openapi
+    │   ├── README.md
+    │   ├── code_samples
+    │   │   ├── C#
+    │   │   │   └── echo
+    │   │   │       └── post.cs
+    │   │   ├── PHP
+    │   │   │   └── echo
+    │   │   │       └── post.php
+    │   │   └── README.md
+    │   ├── components
+    │   │   └── README.md
+    │   └── paths
+    │       └── README.md
+    └── package.json
 ```
 
-##### Using the `$ref`
+However, you can adjust it to any structure you prefer.
 
-Notice in the complex example above the schema definition itself has `$ref` links to other schemas defined.
+The `openapi` folder is where your OpenAPI definition will live.  Inside there, and the sub-folders, there are `README.md` files to help guide you further. This is also where your entrypoint `openapi.yaml` will live.
 
-Here is a small excerpt with an example:
+The `components` folder is where you will organize sub-folders such as `schema` to define your schema.
 
-```yaml
-defaultPaymentInstrument:
-  $ref: ./PaymentInstrument.yaml
+The `paths` folder is where you will organize your paths. There will be a 'README.md' file in there with suggestions for how to organize it into specially named files (or folders) that use an `@` in place of a `/` (because files cannot have a `/` character in them).  You will also be able to use path parameters by wrapping them in curly braces `{example}`.
+
+The `.redocly.yaml` file is a universal configuration for various Redocly tools including the lint tool and reference doc engine.
+
+## Commands
+
+The generated repository includes installing a dependency for our `openapi-cli` tool which supports commands such as `validate`, `bundle`, and more.  There are scripted shortcuts defined in the repository's `package.json`.  
+
+
+## Examples of generated repositories
+- https://github.com/Rebilly/RebillyAPI
+- https://github.com/thingful/openapi-spec
+- https://github.com/TwineHealth/TwineDeveloperDocs
+
+## How to generate your repository
+
+We assume you already have [node.js](https://nodejs.org/) installed.
+
+- Install `create-openapi-repo` globally:
+```bash
+npm install -g create-openapi-repo
+```
+or use [`npx`](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b):
+
+We'll use `npx` in this example.  However, remove `npx` if you installed it globally.
+
+```bash
+npx create-openapi-repo
 ```
 
-The value of the `$ref` is the path to the other schema definition.
+You will be presented with some questions. You can create a new definition or use an existing definition to initialize your project.
 
-You may use `$ref`s to compose schema from other existing schema to avoid duplication.
+Please note, if you do start a new one, remember to [create a GitHub repo](https://help.github.com/articles/create-a-repo/#create-a-new-repository-on-github) where your OpenAPI definition will live.
 
-You will use `$ref`s to reference schema from your path definitions.
+If you use the prior version of this generated repository, please read the following upgrade instructions.
 
-#### Editing Schemas
+#### Upgrading from a prior version
 
-1. Navigate to the `openapi/components/schemas` folder.
-2. Open the file you wish to edit.
-3. Edit.
+Migrate your repository from a previous structure of OpenAPI repo to this newer structure with our migration tool. 
 
-### Paths
+Run this in the root folder of your repo.
 
-#### Adding a Path
-
-1. Navigate to the `openapi/paths` folder.
-2. Add a new YAML file named like your URL endpoint except replacing `/` with `@` and putting path parameters into curly braces like `{example}`.
-3. Add the path and a ref to it inside of your `openapi.yaml` file inside of the `openapi` folder.
-
-Example addition to the `openapi.yaml` file:
-```yaml
-'/customers/{id}':
-  $ref: './paths/customers@{id}.yaml'
+```bash
+npx create-openapi-repo --migrate-2-3
 ```
 
-Here is an example of a YAML file named `customers@{id}.yaml` in the `paths` folder:
+Note: the migration tool does not migrate plugins automatically. You would need to manually add them to the `transformers` folder. 
 
-```yaml
-get:
-  tags:
-    - Customers
-  summary: Retrieve a list of customers
-  operationId: GetCustomerCollection
-  description: |
-    You can have a markdown description here.
-  parameters:
-    - $ref: ../components/parameters/collectionLimit.yaml
-    - $ref: ../components/parameters/collectionOffset.yaml
-    - $ref: ../components/parameters/collectionFilter.yaml
-    - $ref: ../components/parameters/collectionQuery.yaml
-    - $ref: ../components/parameters/collectionExpand.yaml
-    - $ref: ../components/parameters/collectionFields.yaml
-  responses:
-    '200':
-      description: A list of Customers was retrieved successfully
-      headers:
-        Rate-Limit-Limit:
-          $ref: ../components/headers/Rate-Limit-Limit.yaml
-        Rate-Limit-Remaining:
-          $ref: ../components/headers/Rate-Limit-Remaining.yaml
-        Rate-Limit-Reset:
-          $ref: ../components/headers/Rate-Limit-Reset.yaml
-        Pagination-Total:
-          $ref: ../components/headers/Pagination-Total.yaml
-        Pagination-Limit:
-          $ref: ../components/headers/Pagination-Limit.yaml
-        Pagination-Offset:
-          $ref: ../components/headers/Pagination-Offset.yaml
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: ../components/schemas/Customer.yaml
-        text/csv:
-          schema:
-            type: array
-            items:
-              $ref: ../components/schemas/Customer.yaml
-    '401':
-      $ref: ../components/responses/AccessForbidden.yaml
-  x-code-samples:
-    - lang: PHP
-      source:
-        $ref: ../code_samples/PHP/customers/get.php
-post:
-  tags:
-    - Customers
-  summary: Create a customer (without an ID)
-  operationId: PostCustomer
-  description: Another markdown description here.
-  requestBody:
-    $ref: ../components/requestBodies/Customer.yaml
-  responses:
-    '201':
-      $ref: ../components/responses/Customer.yaml
-    '401':
-      $ref: ../components/responses/AccessForbidden.yaml
-    '409':
-      $ref: ../components/responses/Conflict.yaml
-    '422':
-      $ref: ../components/responses/InvalidDataError.yaml
-  x-code-samples:
-    - lang: PHP
-      source:
-        $ref: ../code_samples/PHP/customers/post.php
-```
+## Support
 
-You'll see extensive usage of `$ref`s in this example to different types of components including schemas.
+Thank you for wanting to support us. Here are some ideas how to support us:
 
-You'll also notice `$ref`s to code samples.
+* Star us
+* Tell a friend or colleague about us (or Tweet about us)
+* Write an article about it (and let us know) -- open an issue to let us know, with the link.
+* Consider our commercial products if are looking for automation to ease the docs-like code workflow, hosting along with conveniences like custom domains, access controls and previews, API reference documentation, or a full developer portal:  https://redoc.ly
 
-### Code samples
-
-1. Navigate to the `openapi/code_samples` folder.
-2. Navigate to the `<language>` (e.g. PHP) sub-folder.
-3. Navigate to the `path` folder, and add ref to the code sample.
-
-You can add languages by adding new folders at the appropriate path level.
-
-More details inside the `code_samples` folder README.
+[npm-image]: https://badge.fury.io/js/generator-openapi-repo.svg
+[npm-url]: https://npmjs.org/package/generator-openapi-repo
+[daviddm-image]: https://david-dm.org/Rebilly/generator-openapi-repo.svg?theme=shields.io
+[daviddm-url]: https://david-dm.org/Rebilly/generator-openapi-repo
